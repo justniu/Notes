@@ -82,15 +82,16 @@ dbms_output.put_line('the account doesn''t exist');
 end ;
 
 //create a procedure ERROR!!!
-create procedure QueryId(name char, address char)
+//原来where后面作为条件的变量名不能和字段名相同，而且这里是不区分大小写的。但是作为update和insert into的参数确是可以的
+create procedure QueryId(fullname char, addr char) 
 as
 star number;
 exec number;
 begin
 select count(*) into star from MovieStar where
-name=name and address=address;
+name=fullname and address=addr;
 select count(*) into exec from MovieExec where
-name=name and address=address;
+name=fullname and address=addr;
 if (star=1 and exec=1) then
 dbms_output.put_line('the balance =' || 3);
 elsif (star!=1 and exec!=1) then
