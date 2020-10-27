@@ -52,7 +52,7 @@ netWorth varchar(255)
 insert into MovieExec_NIU values('Mary Moore', 'Maple St', '12345', '100000')
 insert into MovieExec_NIU values('George Lucas', 'Oak Rd', '23456', '200000')
 ```
-### 判断是否是影星or制片人
+### Q1:判断是否是影星or制片人
 影星 ！制片人   = 1
 ！影星 制片人   = 2
 影星 制片人     = 3
@@ -83,7 +83,8 @@ end ;
 
 //create a procedure ERROR!!!
 //原来where后面作为条件的变量名不能和字段名相同，而且这里是不区分大小写的。但是作为update和insert into的参数确是可以的
-create procedure QueryId(fullname char, addr char) 
+// 更新 create or replace ...
+create procedure queryId(fullname char, addr char) 
 as
 star number;
 exec number;
@@ -93,18 +94,79 @@ name=fullname and address=addr;
 select count(*) into exec from MovieExec where
 name=fullname and address=addr;
 if (star=1 and exec=1) then
-dbms_output.put_line('the balance =' || 3);
+dbms_output.put_line('the identifier is: ' || 3);
 elsif (star!=1 and exec!=1) then
-dbms_output.put_line('the balance =' || 4);
+dbms_output.put_line('the identifier is: ' || 4);
 elsif (star!=1 and exec=1) then
-dbms_output.put_line('the balance =' || 2);
+dbms_output.put_line('the identifier is: ' || 2);
 else 
-dbms_output.put_line('the balance =' || 1);
+dbms_output.put_line('the identifier is: ' || 1);
+end if;
+exception
+when no_data_found then
+dbms_output.put_line('the record doesn''t exist');
+end ;
+```
+
+### Q2:给定制片厂名称，给出它的两部最长的电影的标题。如果没有这样的电影，输出
+`NULL`。  
+
+```
+declare
+total number;
+field char(35);
+num number :=0;
+CURSOR cur IS
+select title from title where studioName='Disney' order by length(title) desc;
+begin
+select count(*) into total from title where studioName='Disney';
+if (total <1 ) then
+dbms_output.put_line('this studio no matchs!'); 
+elsif (total =1 ) then
+select title into field from title where studioName='Disney';
+dbms_output.put_line('movie: ' || field);
+else
+OPEN cur;
+LOOP 
+FETCH cur into field;
+EXIT WHEN (num = 2);
+dbms_output.put_line('movie: ' || field);
+num := num + 1;
+END LOOP;
+CLOSE cur;
+end if;
+exception
+when no_data_found then
+dbms_output.put_line('the account doesn''t exist');
+end ;
+
+//create a procedure
+create procedure queryTitle(studio char)
+as
+total number;
+field char(35);
+num number :=0;
+CURSOR cur IS
+select title from title where studioName=studio order by length(title) desc;
+begin
+select count(*) into total from title where studioName=studio;
+if (total <1 ) then
+dbms_output.put_line('this studio no matchs!'); 
+elsif (total =1 ) then
+select title into field from title where studioName=studio;
+dbms_output.put_line('movie: ' || field);
+else
+OPEN cur;
+LOOP 
+FETCH cur into field;
+EXIT WHEN (num = 2);
+dbms_output.put_line('movie: ' || field);
+num := num + 1;
+END LOOP;
+CLOSE cur;
 end if;
 exception
 when no_data_found then
 dbms_output.put_line('the account doesn''t exist');
 end ;
 ```
-
-### Q2:
